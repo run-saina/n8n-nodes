@@ -64,7 +64,11 @@ Run `npm ci`, `npm run lint`, `npm test`, and `npm run scan`. Use `npm run dev` 
 
 A Saina Helm HTTP service exposing `POST /v1/ask` and its API key are required. The package calls that service directly and does not bundle the model or SDK.
 
-The GitHub Actions Publish workflow builds and tests the package before publishing to npm with provenance. The npm package is `@run-saina/n8n-nodes-saina`, owned by the `run-saina` organization. For the first release, create a short-lived granular npm token with read/write access to the `@run-saina` scope and the permissions required for non-interactive publishing, then save it as `NPM_TOKEN` in this repository’s Actions secrets. After the first release, configure npm trusted publishing with GitHub owner `run-saina`, repository `n8n-nodes`, and workflow filename `publish.yml`; the workflow already supports OIDC. Remove the bootstrap token once trusted publishing is working. Run the workflow manually to publish the version in package.json. Each version can be published only once.
+The npm package is `@run-saina/n8n-nodes-saina`, owned by the `run-saina` organization. The GitHub Actions **Publish** workflow builds, tests, and scans before uploading a staged release with provenance. Its `NPM_TOKEN` repository secret needs read/write access to the `@run-saina` scope; bypassing 2FA is not required.
+
+To release, run **Publish** on `main` with operation **stage**, then approve the version in npm's [Staged Packages](https://www.npmjs.com/settings/mems_rama/staged-packages) page using your security key. Until approval, the staged version is not installable; npm may show a `0.0.0-stage` placeholder for a new package. After approval, run **Publish** with operation **verify** to scan the exact published version. Do not rerun staging for a version already staged or published.
+
+Tokenless publishing can be configured in npm package settings using GitHub owner `run-saina`, repository `n8n-nodes`, and workflow filename `publish.yml`. The workflow supports OIDC. Remove the bootstrap token once trusted publishing is working.
 
 After publishing, run `npx @n8n/scan-community-package @run-saina/n8n-nodes-saina` and submit through the n8n Creator Portal. Publication does not imply n8n verification. Eligibility of the Selected/Fallback outputs requires n8n review.
 
