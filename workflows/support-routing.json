@@ -1,0 +1,195 @@
+{
+  "name": "Saina Helm \u2014 Route a support request",
+  "nodes": [
+    {
+      "id": "3a18c56f-3a68-5899-b85b-1220b5130b5e",
+      "name": "Run example",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        240
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "4196f1eb-288a-5751-8dd1-13904d3919eb",
+      "name": "Example input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        220,
+        240
+      ],
+      "parameters": {
+        "jsCode": "return [{json: {\"state\": \"I was charged twice for my subscription.\", \"questions\": {\"route\": {\"type\": \"single_choice\", \"question\": \"Which team should handle this request?\", \"options\": {\"0\": \"Billing\", \"1\": \"Technical support\", \"2\": \"Other\"}}}}}];"
+      }
+    },
+    {
+      "id": "5462bf00-b3c0-554e-b718-d82d531de88d",
+      "name": "Saina Helm",
+      "type": "@saina-run/n8n-nodes-saina.sainaHelm",
+      "typeVersion": 1,
+      "position": [
+        460,
+        240
+      ],
+      "parameters": {
+        "state": "={{ $json.state }}",
+        "questions": "={{ JSON.stringify($json.questions) }}",
+        "mode": "decision",
+        "threshold": 0.8,
+        "minMargin": 0.05,
+        "errorMode": "fallback",
+        "timeout": 60
+      }
+    },
+    {
+      "id": "a858ca64-d705-54d6-b1fd-77e89406a721",
+      "name": "Selected branch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        700,
+        160
+      ],
+      "parameters": {
+        "mode": "expression",
+        "numberOutputs": 3,
+        "output": "={{ Number($json.saina.answers.route.selection) }}"
+      }
+    },
+    {
+      "id": "b470732d-b73a-5ee8-921d-ae18d09769f6",
+      "name": "Uncertain or failed \u2014 review",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        700,
+        440
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "8330e98e-3aa2-5490-b06b-e28033659048",
+      "name": "Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        120,
+        -40
+      ],
+      "parameters": {
+        "content": "## Saina Helm: Route a support request\nInstall the local community node and select your Saina API credentials. Run the sample before replacing the input with your trigger. Selected branches end in no-op nodes; wire your real actions after testing. Fallback includes low confidence, small margin, ties, and inference errors. The 0.8 threshold is an example, not a calibrated default.",
+        "height": 220,
+        "width": 640
+      }
+    },
+    {
+      "id": "06044615-9865-5c64-9e72-5d97ba89742e",
+      "name": "1. Billing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        960,
+        40
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "6df9ef20-ebdc-5887-baf9-bedf1074f3ea",
+      "name": "2. Technical support",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        960,
+        190
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "a19f97c8-7889-524e-936f-affac4214eb3",
+      "name": "3. Other",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        960,
+        340
+      ],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "Run example": {
+      "main": [
+        [
+          {
+            "node": "Example input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Example input": {
+      "main": [
+        [
+          {
+            "node": "Saina Helm",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Saina Helm": {
+      "main": [
+        [
+          {
+            "node": "Selected branch",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Uncertain or failed \u2014 review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Selected branch": {
+      "main": [
+        [
+          {
+            "node": "1. Billing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "2. Technical support",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "3. Other",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": []
+}

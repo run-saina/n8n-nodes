@@ -1,0 +1,185 @@
+{
+  "name": "Saina Helm \u2014 HTTP portable starter",
+  "nodes": [
+    {
+      "id": "3a18c56f-3a68-5899-b85b-1220b5130b5e",
+      "name": "Run example",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        240
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "4196f1eb-288a-5751-8dd1-13904d3919eb",
+      "name": "Example input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        220,
+        240
+      ],
+      "parameters": {
+        "jsCode": "return [{json:{model:\"saina-helm-0.8b\",state:\"I was charged twice.\",mode:\"decision\",questions:{team:{type:\"single_choice\",question:\"Which team should handle this?\",options:{billing:\"Billing\",technical:\"Technical support\",other:\"Other\"}}},threshold:0.8,min_margin:0.05}}];"
+      }
+    },
+    {
+      "id": "130b3dff-804e-510a-b108-ff8364573595",
+      "name": "Saina API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        240
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR-SAINA-API.example.com/v1/ask",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 60000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "6d00665f-7684-5ddc-8410-b9628351126c",
+      "name": "Decision accepted?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        700,
+        240
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "accepted",
+              "leftValue": "={{ $json.answers.team.reason }}",
+              "rightValue": "accepted",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "1fed2a32-17b5-59c2-897b-a662934f1b0a",
+      "name": "Use answers.team.selection to route",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        950,
+        140
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "1a51d357-9ada-5894-98c0-a5c627ea92e8",
+      "name": "Human review",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        950,
+        340
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "8330e98e-3aa2-5490-b06b-e28033659048",
+      "name": "Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        120,
+        -40
+      ],
+      "parameters": {
+        "content": "## No community node required\nSet Saina API URL and select Header Auth credentials: name Authorization, value Bearer YOUR_KEY. Keep secrets in credentials. Use HTTP Request \u2192 Settings \u2192 On Error to connect your own error path; HTTP failures stop this example by default. Returned probabilities are model scores, not calibrated guarantees.",
+        "height": 220,
+        "width": 650
+      }
+    }
+  ],
+  "connections": {
+    "Run example": {
+      "main": [
+        [
+          {
+            "node": "Example input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Example input": {
+      "main": [
+        [
+          {
+            "node": "Saina API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Saina API": {
+      "main": [
+        [
+          {
+            "node": "Decision accepted?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decision accepted?": {
+      "main": [
+        [
+          {
+            "node": "Use answers.team.selection to route",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Human review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": []
+}
