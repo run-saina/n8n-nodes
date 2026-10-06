@@ -60,7 +60,7 @@ are performed by these templates.
 
 ## Development and release
 
-Run `npm ci`, `npm run lint`, and `npm test`. Use `npm run dev` to load the node in a local n8n instance. Run `python3 generate-workflows.py` to regenerate examples.
+Run `npm ci`, `npm run lint`, `npm test`, and `npm run scan`. Use `npm run dev` to load the node in a local n8n instance. Run `python3 generate-workflows.py` to regenerate examples.
 
 A Saina Helm HTTP service exposing `POST /v1/ask` and its API key are required. The package calls that service directly and does not bundle the model or SDK.
 

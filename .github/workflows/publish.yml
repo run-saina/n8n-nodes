@@ -22,12 +22,8 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
+      - run: npm run scan
       - run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Verify published package
-        shell: bash
-        run: |
-          set -o pipefail
-          npx --yes @n8n/scan-community-package@0.38.0 "@saina-run/n8n-nodes-saina@$(node -p 'require("./package.json").version')" | tee scan-result.txt
-          grep -q 'has passed all security checks' scan-result.txt
+      - run: npm run scan:published

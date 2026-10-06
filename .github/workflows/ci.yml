@@ -14,4 +14,4 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
-      - run: npm pack --dry-run
+      - run: npm run scan

@@ -13,7 +13,9 @@
     "build": "n8n-node build",
     "test": "npm run build && node --test test/*.test.cjs",
     "lint": "n8n-node lint",
-    "dev": "n8n-node dev"
+    "dev": "n8n-node dev",
+    "scan": "node scripts/scan.mjs",
+    "scan:published": "node scripts/scan.mjs --published"
   },
   "n8n": {
     "n8nNodesApiVersion": 1,
@@ -27,6 +29,7 @@
   },
   "devDependencies": {
     "@n8n/node-cli": "^0.51.3",
+    "@n8n/scan-community-package": "0.38.0",
     "@types/node": "^22.0.0",
     "n8n-workflow": "2.16.0",
     "typescript": "5.9.3"
