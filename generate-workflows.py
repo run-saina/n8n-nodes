@@ -20,7 +20,7 @@ cases=[('support-routing','Route a support request','I was charged twice for my 
 for slug,title,context,question,choices in cases:
     nodes=[node('Run example','n8n-nodes-base.manualTrigger',[0,240]),
         node('Example input','n8n-nodes-base.code',[220,240],{'jsCode':'return [{json: '+json.dumps({'state':context,'questions':{'route':{'type':'single_choice','question':question,'options':{str(i): label for i,label in enumerate(choices)}}}})+'}];'}),
-        node('Saina Helm','@saina-run/n8n-nodes-saina.sainaHelm',[460,240],{'state':'={{ $json.state }}','questions':'={{ JSON.stringify($json.questions) }}','mode':'decision','threshold':.8,'minMargin':.05,'errorMode':'fallback','timeout':60}),
+        node('Saina Helm','@run-saina/n8n-nodes-saina.sainaHelm',[460,240],{'state':'={{ $json.state }}','questions':'={{ JSON.stringify($json.questions) }}','mode':'decision','threshold':.8,'minMargin':.05,'errorMode':'fallback','timeout':60}),
         node('Selected branch','n8n-nodes-base.switch',[700,160],{'mode':'expression','numberOutputs':len(choices),'output':'={{ Number($json.saina.answers.route.selection) }}'},3.2),
         node('Uncertain or failed — review','n8n-nodes-base.noOp',[700,440]),
         node('Setup','n8n-nodes-base.stickyNote',[120,-40],{'content':'## Saina Helm: '+title+'\nInstall the local community node and select your Saina API credentials. Run the sample before replacing the input with your trigger. Selected branches end in no-op nodes; wire your real actions after testing. Fallback includes low confidence, small margin, ties, and inference errors. The 0.8 threshold is an example, not a calibrated default.','height':220,'width':640})]

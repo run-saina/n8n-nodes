@@ -22,7 +22,7 @@ npm test
 npm pack
 # On the n8n host, install this tarball into the custom/community nodes directory:
 cd ~/.n8n/nodes
-npm install /absolute/path/saina-run-n8n-nodes-saina-0.1.0.tgz
+npm install /absolute/path/run-saina-n8n-nodes-saina-0.1.0.tgz
 # Restart n8n using your normal deployment/service command.
 ```
 
@@ -64,9 +64,9 @@ Run `npm ci`, `npm run lint`, `npm test`, and `npm run scan`. Use `npm run dev` 
 
 A Saina Helm HTTP service exposing `POST /v1/ask` and its API key are required. The package calls that service directly and does not bundle the model or SDK.
 
-The GitHub Actions Publish workflow builds and tests the package before publishing to npm with provenance. Configure the repository's `NPM_TOKEN` secret with package publish access before the first release, or configure npm trusted publishing for this repository and `publish.yml`. Run the workflow manually to publish the version in package.json. Each version can be published only once.
+The GitHub Actions Publish workflow builds and tests the package before publishing to npm with provenance. The npm package is `@run-saina/n8n-nodes-saina`, owned by the `run-saina` organization. For the first release, create a short-lived granular npm token with read/write access to the `@run-saina` scope and the permissions required for non-interactive publishing, then save it as `NPM_TOKEN` in this repository’s Actions secrets. After the first release, configure npm trusted publishing with GitHub owner `run-saina`, repository `n8n-nodes`, and workflow filename `publish.yml`; the workflow already supports OIDC. Remove the bootstrap token once trusted publishing is working. Run the workflow manually to publish the version in package.json. Each version can be published only once.
 
-After publishing, run `npx @n8n/scan-community-package @saina-run/n8n-nodes-saina` and submit through the n8n Creator Portal. Publication does not imply n8n verification. Eligibility of the Selected/Fallback outputs requires n8n review.
+After publishing, run `npx @n8n/scan-community-package @run-saina/n8n-nodes-saina` and submit through the n8n Creator Portal. Publication does not imply n8n verification. Eligibility of the Selected/Fallback outputs requires n8n review.
 
 ## License
 

@@ -28,7 +28,7 @@
     {
       "id": "5462bf00-b3c0-554e-b718-d82d531de88d",
       "name": "Saina Helm",
-      "type": "@saina-run/n8n-nodes-saina.sainaHelm",
+      "type": "@run-saina/n8n-nodes-saina.sainaHelm",
       "typeVersion": 1,
       "position": [
         460,
