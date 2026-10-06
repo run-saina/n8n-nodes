@@ -1,6 +1,6 @@
 {
   "name": "@run-saina/n8n-nodes-saina",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Saina Helm decision node with confidence and fallback routing",
   "license": "MIT",
   "keywords": [
@@ -39,7 +39,7 @@
   },
   "author": {
     "name": "Mendrika",
-    "email": "ramarlina@users.noreply.github.com",
+    "email": "dev@saina.run",
     "url": "https://github.com/ramarlina"
   },
   "repository": {
@@ -48,7 +48,8 @@
   },
   "homepage": "https://github.com/run-saina/n8n-nodes#readme",
   "bugs": {
-    "url": "https://github.com/run-saina/n8n-nodes/issues"
+    "url": "https://github.com/run-saina/n8n-nodes/issues",
+    "email": "dev@saina.run"
   },
   "publishConfig": {
     "access": "public"

@@ -32,7 +32,7 @@ npm test
 npm pack
 # On the n8n host, install this tarball into the custom/community nodes directory:
 cd ~/.n8n/nodes
-npm install /absolute/path/run-saina-n8n-nodes-saina-0.2.0.tgz
+npm install /absolute/path/run-saina-n8n-nodes-saina-0.2.1.tgz
 # Restart n8n using your normal deployment/service command.
 ```
 
@@ -85,3 +85,7 @@ After publishing, run `npx @n8n/scan-community-package @run-saina/n8n-nodes-sain
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+## Developer contact
+
+For integration support and developer enquiries, email [dev@saina.run](mailto:dev@saina.run).
