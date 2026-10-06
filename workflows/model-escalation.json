@@ -22,26 +22,27 @@
         240
       ],
       "parameters": {
-        "jsCode": "return [{json: {\"state\": \"Compare conflicting clauses in these three contracts across jurisdictions.\", \"questions\": {\"route\": {\"type\": \"single_choice\", \"question\": \"Does this request need deeper reasoning or more information?\", \"options\": {\"0\": \"Escalate to a larger model\", \"1\": \"Handle with the current model\", \"2\": \"Ask for clarification\"}}}}}];"
+        "jsCode": "return [{json: {\"context\": \"Compare conflicting clauses in these three contracts across jurisdictions.\", \"question\": \"Does this request need deeper reasoning or more information?\", \"answers\": \"Escalate to a larger model\\nHandle with the current model\\nAsk for clarification\"}}];"
       }
     },
     {
       "id": "5462bf00-b3c0-554e-b718-d82d531de88d",
       "name": "Saina Helm",
       "type": "@run-saina/n8n-nodes-saina.sainaHelm",
-      "typeVersion": 1,
+      "typeVersion": 2,
       "position": [
         460,
         240
       ],
       "parameters": {
-        "state": "={{ $json.state }}",
-        "questions": "={{ JSON.stringify($json.questions) }}",
-        "mode": "decision",
-        "threshold": 0.8,
-        "minMargin": 0.05,
-        "errorMode": "fallback",
-        "timeout": 60
+        "context": "={{ $json.context }}",
+        "question": "={{ $json.question }}",
+        "answers": "={{ $json.answers }}",
+        "advanced": {
+          "resultKey": "route",
+          "minMargin": 0.05,
+          "errorMode": "fallback"
+        }
       }
     },
     {
@@ -56,7 +57,7 @@
       "parameters": {
         "mode": "expression",
         "numberOutputs": 3,
-        "output": "={{ Number($json.saina.answers.route.selection) }}"
+        "output": "={{ [\"Escalate to a larger model\", \"Handle with the current model\", \"Ask for clarification\"].indexOf($json.saina.answers.route.selection) }}"
       }
     },
     {

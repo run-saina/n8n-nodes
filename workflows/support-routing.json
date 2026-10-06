@@ -22,26 +22,27 @@
         240
       ],
       "parameters": {
-        "jsCode": "return [{json: {\"state\": \"I was charged twice for my subscription.\", \"questions\": {\"route\": {\"type\": \"single_choice\", \"question\": \"Which team should handle this request?\", \"options\": {\"0\": \"Billing\", \"1\": \"Technical support\", \"2\": \"Other\"}}}}}];"
+        "jsCode": "return [{json: {\"context\": \"I was charged twice for my subscription.\", \"question\": \"Which team should handle this request?\", \"answers\": \"Billing\\nTechnical support\\nOther\"}}];"
       }
     },
     {
       "id": "5462bf00-b3c0-554e-b718-d82d531de88d",
       "name": "Saina Helm",
       "type": "@run-saina/n8n-nodes-saina.sainaHelm",
-      "typeVersion": 1,
+      "typeVersion": 2,
       "position": [
         460,
         240
       ],
       "parameters": {
-        "state": "={{ $json.state }}",
-        "questions": "={{ JSON.stringify($json.questions) }}",
-        "mode": "decision",
-        "threshold": 0.8,
-        "minMargin": 0.05,
-        "errorMode": "fallback",
-        "timeout": 60
+        "context": "={{ $json.context }}",
+        "question": "={{ $json.question }}",
+        "answers": "={{ $json.answers }}",
+        "advanced": {
+          "resultKey": "route",
+          "minMargin": 0.05,
+          "errorMode": "fallback"
+        }
       }
     },
     {
@@ -56,7 +57,7 @@
       "parameters": {
         "mode": "expression",
         "numberOutputs": 3,
-        "output": "={{ Number($json.saina.answers.route.selection) }}"
+        "output": "={{ [\"Billing\", \"Technical support\", \"Other\"].indexOf($json.saina.answers.route.selection) }}"
       }
     },
     {
