@@ -5,7 +5,7 @@ import { buildQuestion, readAdvanced } from './form';
 import type { AdvancedOptions } from './form';
 export class SainaHelm implements INodeType {
   description: INodeTypeDescription = {
-    subtitle: 'Ask Saina Helm', displayName: 'Saina Helm', name: 'sainaHelm', icon: { light: 'file:saina.svg', dark: 'file:saina.svg' }, group: ['transform'], version: [1, 2], defaultVersion: 2,
+    subtitle: 'Ask Saina Helm', displayName: 'Saina Helm', name: 'sainaHelm', icon: { light: 'file:saina.svg', dark: 'file:saina.dark.svg' }, group: ['transform'], version: [1, 2], defaultVersion: 2,
     description: 'Ask typed questions and route rejected decisions to fallback', defaults: { name: 'Saina Helm' },
     inputs: [NodeConnectionTypes.Main], outputs: [NodeConnectionTypes.Main, NodeConnectionTypes.Main], outputNames: ['Selected', 'Fallback'],
     credentials: [{ name: 'sainaHelmApi', required: true }],

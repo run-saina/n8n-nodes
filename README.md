@@ -32,7 +32,7 @@ npm test
 npm pack
 # On the n8n host, install this tarball into the custom/community nodes directory:
 cd ~/.n8n/nodes
-npm install /absolute/path/run-saina-n8n-nodes-saina-0.2.2.tgz
+npm install /absolute/path/run-saina-n8n-nodes-saina-0.2.3.tgz
 # Restart n8n using your normal deployment/service command.
 ```
 
