@@ -153,3 +153,16 @@ MIT. See [LICENSE](LICENSE).
 ## Developer contact
 
 For integration support and developer enquiries, email [dev@saina.run](mailto:dev@saina.run).
+
+## Checking against a real n8n
+
+Unit tests mock n8n's request helper. To run a template on a real n8n against a gateway (verified with
+n8n 2.42.5 and the support-routing template on 2026-10-08: one UUIDv7 idempotency key, billing metadata in
+`_saina`, one settled charge):
+
+1. `npm run build`, then copy `package.json` and `dist/` to `<n8n user folder>/.n8n/nodes/node_modules/@run-saina/n8n-nodes-saina/`
+   and list the package in `<n8n user folder>/.n8n/nodes/package.json` (this is how n8n installs community
+   nodes; `N8N_CUSTOM_EXTENSIONS` registers nodes under a different type name, which the templates don't use).
+2. `n8n import:credentials` with a `sainaHelmApi` credential (`baseUrl`, `apiKey`), then `n8n import:workflow`
+   with the template, its Saina node pointing at that credential.
+3. `n8n execute --id=<workflow id> --rawOutput` and check the Saina node's output and the gateway's usage.
