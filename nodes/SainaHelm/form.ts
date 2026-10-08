@@ -7,6 +7,9 @@ export interface AdvancedOptions {
   minMargin?: number;
   timeout?: number;
   errorMode?: string;
+  idempotencyKey?: unknown;
+  maxRetries?: number;
+  includeBilling?: boolean;
 }
 
 export function buildQuestion(question: string, answers: string, advanced: AdvancedOptions = {}) {
@@ -49,11 +52,17 @@ export function readAdvanced(advanced: AdvancedOptions) {
   const threshold = advanced.threshold ?? 0.8;
   const minMargin = advanced.minMargin ?? 0;
   const timeout = advanced.timeout ?? 60;
+  const maxRetries = advanced.maxRetries ?? 2;
+  const includeBilling = advanced.includeBilling ?? true;
+  // Validated by the node so an invalid key gets its own error message.
+  const idempotencyKey: unknown = advanced.idempotencyKey ?? '';
   if (!['decision', 'distribution'].includes(mode)) throw new Error('Select a supported mode');
   if (!['stop', 'fallback'].includes(errorMode)) throw new Error('Select a supported error action');
   for (const value of [threshold, minMargin]) {
     if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 1) throw new Error('Confidence threshold and margin must be between 0 and 1');
   }
   if (typeof timeout !== 'number' || !Number.isFinite(timeout) || timeout < 1 || timeout > 300) throw new Error('Timeout must be between 1 and 300 seconds');
-  return { mode, errorMode, threshold, minMargin, timeout };
+  if (typeof maxRetries !== 'number' || !Number.isInteger(maxRetries) || maxRetries < 0 || maxRetries > 10) throw new Error('Max retries must be an integer between 0 and 10');
+  if (typeof includeBilling !== 'boolean') throw new Error('Include billing metadata must be true or false');
+  return { mode, errorMode, threshold, minMargin, timeout, maxRetries, includeBilling, idempotencyKey };
 }
