@@ -155,7 +155,8 @@ function sainaError(node: INode, failure: Failure, fields: IDataObject, itemInde
   if (failure.kind === 'api' && failure.httpStatus) {
     error = new NodeApiError(node, fields as JsonObject, { message: `Saina API error: ${failure.code} (HTTP ${failure.httpStatus})`, description: details, httpCode: String(failure.httpStatus), itemIndex });
   } else if (failure.kind === 'connection' || failure.kind === 'uncertain') {
-    error = new NodeOperationError(node, `Could not get a response from Saina (${failure.code}) after ${String(fields.attempts)} attempt(s)`, { itemIndex, description: details });
+    // Keep the transport code out of the message: n8n would replace it with a generic text.
+    error = new NodeOperationError(node, `Could not get a response from Saina after ${String(fields.attempts)} attempt(s)`, { itemIndex, description: `Error: ${failure.code}. ${details}` });
   } else if (failure.kind === 'cancelled') {
     error = new NodeOperationError(node, 'Saina request cancelled', { itemIndex, description: details });
   } else {
