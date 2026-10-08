@@ -1,6 +1,70 @@
 {
-  "name": "Saina Helm \u2014 Choose a model tier",
+  "name": "Choose an LLM tier for each request with Saina Helm",
   "nodes": [
+    {
+      "id": "c38c9eb8-579e-5014-b92b-748db517559e",
+      "name": "Template overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -620,
+        -120
+      ],
+      "parameters": {
+        "content": "## Choose an LLM tier for each request with Saina Helm\n\n> **Self-hosted n8n only.** This template uses the [Saina Helm community node](https://www.npmjs.com/package/@run-saina/n8n-nodes-saina), which is not yet verified, so it can't be installed on n8n Cloud. On n8n Cloud, use the \"Route support tickets to teams with Saina Helm over HTTP\" template instead.\n\n## Who's it for\nTeams running LLM workflows who want to save cost by sending easy requests to a small model and only escalating the hard ones.\n\n## How it works\nBefore an expensive LLM call, Saina Helm decides whether the request needs a larger model, can stay on the current one, or needs clarification first. [Saina Helm](https://saina.run) is a small decision model: instead of generating text, it scores every option and returns a probability for each. The workflow takes the top option only when it's confident.\n\n1. **Example input** holds the situation, the question, and the possible answers, one per line.\n2. **Saina Helm** scores the answers. Confident decisions leave through the first output; low confidence, a near tie, or an inference error leave through the fallback output.\n3. **Selected branch** sends the item to **Larger reasoning model**, **Current small model** or **Ask the user for clarification**. **Uncertain or failed — review** catches everything else, so nothing is acted on blindly.\n\n## How to set up\n1. Install `@run-saina/n8n-nodes-saina` under **Settings → Community nodes**.\n2. Get a Saina endpoint. **Hosted:** request a key at [saina.run/api](https://saina.run/api/) and use `https://api.saina.run` (keys are issued from a waitlist; request bodies are never stored). **Self-hosted:** run the free server with Docker ([run-saina/deploy](https://github.com/run-saina/deploy)) or `pip install 'saina[local,server]'`; it needs about 4 GB of RAM on CPU and downloads the open [Saina Helm 0.8B](https://huggingface.co/run-saina/saina-helm-0.8b) weights on first start.\n3. Create **Saina Helm API** credentials with the base URL (`https://api.saina.run` or your server) and API key, select them in the Saina Helm node, then click **Test workflow**.\n\n## Requirements\n- Self-hosted n8n with community nodes enabled\n- A Saina API key: hosted at api.saina.run, or your own server\n\n## How to customize the workflow\nReplace **Run example** with your real trigger and map its fields into **Example input**. Put your LLM nodes on the larger-model and small-model branches, and send clarification requests back to the user. Then connect your real actions in place of the no-op nodes. The 0.05 minimum margin is an example; tune it on your own data.",
+        "width": 560,
+        "height": 1160,
+        "color": 1
+      }
+    },
+    {
+      "id": "7e89568d-8c46-555a-b537-7c6c2bf9b7da",
+      "name": "Step 1 · Input",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        60
+      ],
+      "parameters": {
+        "content": "### 1. Input\nReplace **Run example** with your trigger. Map your data into **Example input**: the situation, the question, and one answer per line.",
+        "width": 460,
+        "height": 360,
+        "color": 7
+      }
+    },
+    {
+      "id": "1fac9f9d-0acd-5ea5-bb21-4043cfbca096",
+      "name": "Step 2 · Decide",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        440,
+        60
+      ],
+      "parameters": {
+        "content": "### 2. Decide\n**Saina Helm** scores every answer and only accepts a confident one.",
+        "width": 260,
+        "height": 360,
+        "color": 7
+      }
+    },
+    {
+      "id": "1795462f-c19d-5c16-9834-f030e7cff30b",
+      "name": "Step 3 · Act",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        680,
+        -120
+      ],
+      "parameters": {
+        "content": "### 3. Act\nEach confident answer gets its own branch. Uncertain or failed items go to review. Swap the no-op nodes for your real actions.",
+        "width": 520,
+        "height": 760,
+        "color": 7
+      }
+    },
     {
       "id": "3a18c56f-3a68-5899-b85b-1220b5130b5e",
       "name": "Run example",
@@ -15,14 +79,36 @@
     {
       "id": "4196f1eb-288a-5751-8dd1-13904d3919eb",
       "name": "Example input",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
         220,
         240
       ],
       "parameters": {
-        "jsCode": "return [{json: {\"context\": \"Compare conflicting clauses in these three contracts across jurisdictions.\", \"question\": \"Does this request need deeper reasoning or more information?\", \"answers\": \"Escalate to a larger model\\nHandle with the current model\\nAsk for clarification\"}}];"
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2a8fa6cc-d6d9-55b2-b14d-99bfa10db840",
+              "name": "context",
+              "value": "User request: Compare the indemnification and liability-cap clauses across these three 40-page contracts governed by New York, English and German law, and explain where they conflict.",
+              "type": "string"
+            },
+            {
+              "id": "2fc02eb2-b570-517b-aadf-a6ac6729afc3",
+              "name": "question",
+              "value": "Which model tier should handle this request?",
+              "type": "string"
+            },
+            {
+              "id": "427f13b5-cdc9-53f2-82d7-211f69ec95cc",
+              "name": "answers",
+              "value": "Larger reasoning model\nCurrent small model\nAsk the user for clarification",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
       }
     },
     {
@@ -31,7 +117,7 @@
       "type": "@run-saina/n8n-nodes-saina.sainaHelm",
       "typeVersion": 2,
       "position": [
-        460,
+        480,
         240
       ],
       "parameters": {
@@ -51,71 +137,56 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        700,
+        740,
         160
       ],
       "parameters": {
         "mode": "expression",
         "numberOutputs": 3,
-        "output": "={{ [\"Escalate to a larger model\", \"Handle with the current model\", \"Ask for clarification\"].indexOf($json.saina.answers.route.selection) }}"
+        "output": "={{ [\"Larger reasoning model\", \"Current small model\", \"Ask the user for clarification\"].indexOf($json.saina.answers.route.selection) }}"
       }
     },
     {
       "id": "b470732d-b73a-5ee8-921d-ae18d09769f6",
-      "name": "Uncertain or failed \u2014 review",
+      "name": "Uncertain or failed — review",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        700,
-        440
+        740,
+        480
       ],
       "parameters": {}
     },
     {
-      "id": "8330e98e-3aa2-5490-b06b-e28033659048",
-      "name": "Setup",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        120,
-        -40
-      ],
-      "parameters": {
-        "content": "## Saina Helm: Choose a model tier\nInstall the local community node and select your Saina API credentials. Run the sample before replacing the input with your trigger. Selected branches end in no-op nodes; wire your real actions after testing. Fallback includes low confidence, small margin, ties, and inference errors. The 0.8 threshold is an example, not a calibrated default.",
-        "height": 220,
-        "width": 640
-      }
-    },
-    {
-      "id": "c45b2b2a-8976-596b-bb68-bad77c8bd93a",
-      "name": "1. Escalate to a larger model",
+      "id": "1616c6b5-3c61-550b-bc1d-8de4a86225f9",
+      "name": "1. Larger reasoning model",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        960,
-        40
+        1000,
+        20
       ],
       "parameters": {}
     },
     {
-      "id": "11c276b1-ad0d-5435-a6ab-224fe25ff516",
-      "name": "2. Handle with the current model",
+      "id": "f2893421-f270-5aae-8b57-fb9d931f32de",
+      "name": "2. Current small model",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        960,
-        190
+        1000,
+        170
       ],
       "parameters": {}
     },
     {
-      "id": "bc016b46-263b-5243-bee3-c459efbc4891",
-      "name": "3. Ask for clarification",
+      "id": "6fe2664b-446d-542a-92ac-cd9267b2b1ec",
+      "name": "3. Ask the user for clarification",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        960,
-        340
+        1000,
+        320
       ],
       "parameters": {}
     }
@@ -154,7 +225,7 @@
         ],
         [
           {
-            "node": "Uncertain or failed \u2014 review",
+            "node": "Uncertain or failed — review",
             "type": "main",
             "index": 0
           }
@@ -165,21 +236,21 @@
       "main": [
         [
           {
-            "node": "1. Escalate to a larger model",
+            "node": "1. Larger reasoning model",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "2. Handle with the current model",
+            "node": "2. Current small model",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "3. Ask for clarification",
+            "node": "3. Ask the user for clarification",
             "type": "main",
             "index": 0
           }

@@ -1,6 +1,70 @@
 {
-  "name": "Saina Helm \u2014 HTTP portable starter",
+  "name": "Route support tickets to teams with Saina Helm over HTTP",
   "nodes": [
+    {
+      "id": "c38c9eb8-579e-5014-b92b-748db517559e",
+      "name": "Template overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -620,
+        -120
+      ],
+      "parameters": {
+        "content": "## Route support tickets to teams with Saina Helm over HTTP\n\nWorks on n8n Cloud and self-hosted n8n: it uses only the built-in Set, HTTP Request and Switch nodes, no community node.\n\n## Who's it for\nSupport teams and solo founders on n8n Cloud who want inbound messages sent to the right queue by a small decision model instead of a chat-model call per ticket.\n\n## How it works\n[Saina Helm](https://saina.run) is a decision model: instead of generating text, it scores every option and returns a probability for each.\n\n1. **Example input** holds the API URL, the message, and the confidence threshold.\n2. **Saina API** posts the message to your server's `/v1/ask` endpoint with the question \"Which team should handle this request?\".\n3. **Selected branch** sends confident answers to **Billing**, **Technical support** or **Other**. Answers below the threshold, or too close to call, go to **Uncertain — review**.\n\n## How to set up\n1. Get a Saina endpoint. **Hosted:** request a key at [saina.run/api](https://saina.run/api/) and use `https://api.saina.run` (keys are issued from a waitlist; request bodies are never stored). **Self-hosted:** run the free server with Docker ([run-saina/deploy](https://github.com/run-saina/deploy)) or `pip install 'saina[local,server]'`; it needs about 4 GB of RAM on CPU and downloads the open [Saina Helm 0.8B](https://huggingface.co/run-saina/saina-helm-0.8b) weights on first start.\n2. If you self-host, the server must be reachable from n8n over HTTPS.\n3. Create a **Header Auth** credential with name `Authorization` and value `Bearer YOUR_KEY`, and select it in **Saina API**.\n4. If you self-host, set `saina_api_url` in **Example input** to your server. Then click **Test workflow**.\n\n## Requirements\n- n8n Cloud or self-hosted n8n\n- A Saina API key: hosted at api.saina.run, or your own server over HTTPS\n\n## How to customize the workflow\nReplace **Run example** with your real trigger and map the message into **Example input**. Edit the options in the **Saina API** body to match your own queues, and keep the Switch expression in the same order. HTTP errors stop the workflow; use **Settings → On Error** on the HTTP node to route them to review instead. Probabilities are model scores, not calibrated guarantees.",
+        "width": 560,
+        "height": 1160,
+        "color": 1
+      }
+    },
+    {
+      "id": "7e89568d-8c46-555a-b537-7c6c2bf9b7da",
+      "name": "Step 1 · Input",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        60
+      ],
+      "parameters": {
+        "content": "### 1. Input\nReplace **Run example** with your trigger. Map the incoming message into **Example input**; change the URL only if you self-host.",
+        "width": 460,
+        "height": 360,
+        "color": 7
+      }
+    },
+    {
+      "id": "1fac9f9d-0acd-5ea5-bb21-4043cfbca096",
+      "name": "Step 2 · Decide",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        440,
+        60
+      ],
+      "parameters": {
+        "content": "### 2. Decide\n**Saina API** sends the message to your server's `/v1/ask` and gets a score for each team.",
+        "width": 260,
+        "height": 360,
+        "color": 7
+      }
+    },
+    {
+      "id": "1795462f-c19d-5c16-9834-f030e7cff30b",
+      "name": "Step 3 · Act",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        680,
+        -120
+      ],
+      "parameters": {
+        "content": "### 3. Act\nEach confident answer gets its own branch. Uncertain or failed items go to review. Swap the no-op nodes for your real actions.",
+        "width": 520,
+        "height": 760,
+        "color": 7
+      }
+    },
     {
       "id": "3a18c56f-3a68-5899-b85b-1220b5130b5e",
       "name": "Run example",
@@ -15,14 +79,36 @@
     {
       "id": "4196f1eb-288a-5751-8dd1-13904d3919eb",
       "name": "Example input",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
         220,
         240
       ],
       "parameters": {
-        "jsCode": "return [{json:{model:\"saina-helm-0.8b\",state:\"I was charged twice.\",mode:\"decision\",questions:{team:{type:\"single_choice\",question:\"Which team should handle this?\",options:{billing:\"Billing\",technical:\"Technical support\",other:\"Other\"}}},threshold:0.8,min_margin:0.05}}];"
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7ce90f50-024a-5fd1-b5d8-a52c4e17a545",
+              "name": "saina_api_url",
+              "value": "https://api.saina.run",
+              "type": "string"
+            },
+            {
+              "id": "3b1c6704-a4b3-5114-8d89-f276c0ade437",
+              "name": "message",
+              "value": "I was charged twice for my subscription.",
+              "type": "string"
+            },
+            {
+              "id": "23faa939-b05f-5831-8240-d291cec6eba5",
+              "name": "threshold",
+              "value": 0.8,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
       }
     },
     {
@@ -31,17 +117,17 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        460,
+        480,
         240
       ],
       "parameters": {
         "method": "POST",
-        "url": "https://YOUR-SAINA-API.example.com/v1/ask",
+        "url": "={{ $json.saina_api_url }}/v1/ask",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify($json) }}",
+        "jsonBody": "={{ JSON.stringify({ model: \"saina-helm-0.8b\", mode: \"decision\", state: $json.message, questions: { team: { type: \"single_choice\", question: \"Which team should handle this request?\", options: {\"billing\": \"Billing\", \"technical\": \"Technical support\", \"other\": \"Other\"} } }, threshold: $json.threshold, min_margin: 0.05 }) }}",
         "options": {
           "timeout": 60000,
           "redirect": {
@@ -53,74 +139,63 @@
       }
     },
     {
-      "id": "6d00665f-7684-5ddc-8410-b9628351126c",
-      "name": "Decision accepted?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
+      "id": "a858ca64-d705-54d6-b1fd-77e89406a721",
+      "name": "Selected branch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
       "position": [
-        700,
+        740,
         240
       ],
       "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "id": "accepted",
-              "leftValue": "={{ $json.answers.team.reason }}",
-              "rightValue": "accepted",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
+        "mode": "expression",
+        "numberOutputs": 4,
+        "output": "={{ $json.answers.team.reason === \"accepted\" ? [\"billing\", \"technical\", \"other\"].indexOf($json.answers.team.selection) : 3 }}"
       }
     },
     {
-      "id": "1fed2a32-17b5-59c2-897b-a662934f1b0a",
-      "name": "Use answers.team.selection to route",
+      "id": "06044615-9865-5c64-9e72-5d97ba89742e",
+      "name": "1. Billing",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        950,
-        140
+        1000,
+        -20
       ],
       "parameters": {}
     },
     {
-      "id": "1a51d357-9ada-5894-98c0-a5c627ea92e8",
-      "name": "Human review",
+      "id": "6df9ef20-ebdc-5887-baf9-bedf1074f3ea",
+      "name": "2. Technical support",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        950,
-        340
+        1000,
+        130
       ],
       "parameters": {}
     },
     {
-      "id": "8330e98e-3aa2-5490-b06b-e28033659048",
-      "name": "Setup",
-      "type": "n8n-nodes-base.stickyNote",
+      "id": "a19f97c8-7889-524e-936f-affac4214eb3",
+      "name": "3. Other",
+      "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        120,
-        -40
+        1000,
+        280
       ],
-      "parameters": {
-        "content": "## No community node required\nSet Saina API URL and select Header Auth credentials: name Authorization, value Bearer YOUR_KEY. Keep secrets in credentials. Use HTTP Request \u2192 Settings \u2192 On Error to connect your own error path; HTTP failures stop this example by default. Returned probabilities are model scores, not calibrated guarantees.",
-        "height": 220,
-        "width": 650
-      }
+      "parameters": {}
+    },
+    {
+      "id": "5e743353-9d45-5cc7-b0ef-f58e2aaaebd7",
+      "name": "Uncertain — review",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        430
+      ],
+      "parameters": {}
     }
   ],
   "connections": {
@@ -150,25 +225,39 @@
       "main": [
         [
           {
-            "node": "Decision accepted?",
+            "node": "Selected branch",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Decision accepted?": {
+    "Selected branch": {
       "main": [
         [
           {
-            "node": "Use answers.team.selection to route",
+            "node": "1. Billing",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Human review",
+            "node": "2. Technical support",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "3. Other",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Uncertain — review",
             "type": "main",
             "index": 0
           }
