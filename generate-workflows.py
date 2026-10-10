@@ -104,7 +104,7 @@ for slug,title,context,question,choices,who,what,customize in cases:
 
 # No community node needed: n8n Cloud can use Set, HTTP Request and Switch.
 labels={'billing':'Billing','technical':'Technical support','other':'Other'}
-body=('={{ JSON.stringify({ model: "saina-helm-0.8b", mode: "decision", state: $json.message, '
+body=('={{ JSON.stringify({ model: "saina-helm", mode: "decision", state: $json.message, '
       'questions: { team: { type: "single_choice", question: "Which team should handle this request?", '
       'options: '+json.dumps(labels)+' } }, threshold: $json.threshold, min_margin: 0.05 }) }}')
 route='={{ $json.answers.team.reason === "accepted" ? '+json.dumps(list(labels))+'.indexOf($json.answers.team.selection) : 3 }}'

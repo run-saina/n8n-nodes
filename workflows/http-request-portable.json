@@ -127,7 +127,7 @@
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ model: \"saina-helm-0.8b\", mode: \"decision\", state: $json.message, questions: { team: { type: \"single_choice\", question: \"Which team should handle this request?\", options: {\"billing\": \"Billing\", \"technical\": \"Technical support\", \"other\": \"Other\"} } }, threshold: $json.threshold, min_margin: 0.05 }) }}",
+        "jsonBody": "={{ JSON.stringify({ model: \"saina-helm\", mode: \"decision\", state: $json.message, questions: { team: { type: \"single_choice\", question: \"Which team should handle this request?\", options: {\"billing\": \"Billing\", \"technical\": \"Technical support\", \"other\": \"Other\"} } }, threshold: $json.threshold, min_margin: 0.05 }) }}",
         "options": {
           "timeout": 60000,
           "redirect": {

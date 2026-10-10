@@ -7,7 +7,11 @@ export interface AdvancedOptions {
   minMargin?: number;
   timeout?: number;
   errorMode?: string;
+  model?: string;
 }
+
+// Unversioned `saina-helm` follows the endpoint's default model; versioned names pin one.
+export const MODELS = ['saina-helm', 'saina-helm-2-0.8b', 'saina-helm-0.8b'];
 
 export function buildQuestion(question: string, answers: string, advanced: AdvancedOptions = {}) {
   if (typeof question !== 'string' || !question.trim()) throw new Error('Question is required');
@@ -49,11 +53,13 @@ export function readAdvanced(advanced: AdvancedOptions) {
   const threshold = advanced.threshold ?? 0.8;
   const minMargin = advanced.minMargin ?? 0;
   const timeout = advanced.timeout ?? 60;
+  const model = advanced.model ?? 'saina-helm';
+  if (!MODELS.includes(model)) throw new Error('Select a supported model');
   if (!['decision', 'distribution'].includes(mode)) throw new Error('Select a supported mode');
   if (!['stop', 'fallback'].includes(errorMode)) throw new Error('Select a supported error action');
   for (const value of [threshold, minMargin]) {
     if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || value > 1) throw new Error('Confidence threshold and margin must be between 0 and 1');
   }
   if (typeof timeout !== 'number' || !Number.isFinite(timeout) || timeout < 1 || timeout > 300) throw new Error('Timeout must be between 1 and 300 seconds');
-  return { mode, errorMode, threshold, minMargin, timeout };
+  return { mode, errorMode, threshold, minMargin, timeout, model };
 }

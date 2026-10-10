@@ -8,13 +8,14 @@ Ask Saina Helm a question using three required fields:
 
 For example, provide your support request as Context, ask “Which team should handle this?”, and enter `Billing, Technical support, Other` as Answers. The default selects one answer. Read the selected label at `saina.answers.answer.selection`.
 
-**Advanced** contains optional answer descriptions, answer type, confidence threshold, minimum margin, mode, error handling, result key, and timeout. Defaults are single answer, Decision mode, threshold `0.8`, margin `0`, timeout 60 seconds, and stopping on API errors. Tune the threshold with representative data.
+**Advanced** contains optional answer descriptions, answer type, confidence threshold, minimum margin, mode, model, error handling, result key, and timeout. Defaults are single answer, Decision mode, threshold `0.8`, margin `0`, timeout 60 seconds, and stopping on API errors. Tune the threshold with representative data.
 
 - **Multiple Answers** treats labels as independent tags and requires a tagging-trained checkpoint. Read `selections`.
 - **Yes / No** requires exactly `Yes` and `No` as Answers. Read `selected` (boolean).
 - **Rating** uses 2–10 answer labels in ascending order. Read `level` (zero-based) and `levels`.
 - **Answer Descriptions** lets you add detail to individual labels by matching their exact spelling; other labels need no description.
 - **Result Key** changes `answer` in `saina.answers.answer`.
+- **Model** defaults to **Endpoint Default** (`saina-helm`), the model your endpoint serves by default, so workflows move to new Helm releases with the endpoint. Choose **Helm 2 0.8B** or **Helm 0.8B (Original)** to pin one; an endpoint that does not serve the pinned model returns an error. Node version 1 workflows keep using the original Helm.
 
 In Decision mode, **Selected** receives accepted answers and **Fallback** receives rejected decisions. Distribution mode sends successful results to Selected without applying thresholds. Inference errors stop by default, or use Fallback when explicitly configured. Invalid form inputs stop before making an API request.
 
@@ -32,7 +33,7 @@ npm test
 npm pack
 # On the n8n host, install this tarball into the custom/community nodes directory:
 cd ~/.n8n/nodes
-npm install /absolute/path/run-saina-n8n-nodes-saina-0.2.3.tgz
+npm install /absolute/path/run-saina-n8n-nodes-saina-0.2.4.tgz
 # Restart n8n using your normal deployment/service command.
 ```
 

@@ -31,6 +31,11 @@ export class SainaHelm implements INodeType {
           { displayName: 'Confidence Threshold', name: 'threshold', type: 'number', typeOptions: { minValue: 0, maxValue: 1, numberPrecision: 3 }, default: 0.8, description: 'Minimum top probability for an accepted decision. Ignored in Distribution mode. Tune with representative data.' },
           { displayName: 'Minimum Margin', name: 'minMargin', type: 'number', typeOptions: { minValue: 0, maxValue: 1, numberPrecision: 3 }, default: 0, description: 'Minimum gap between the best two answers. Ignored in Distribution mode. Exact ties fall back.' },
           { displayName: 'Mode', name: 'mode', type: 'options', options: [{ name: 'Decision', value: 'decision' }, { name: 'Distribution', value: 'distribution' }], default: 'decision', description: 'Decision applies confidence rules; Distribution returns scores without applying thresholds' },
+          { displayName: 'Model', name: 'model', type: 'options', default: 'saina-helm', description: 'Which Helm answers. Endpoint Default follows the server and moves to new releases; the others pin one model.', options: [
+            { name: 'Endpoint Default', value: 'saina-helm', description: 'The model the endpoint serves by default' },
+            { name: 'Helm 2 0.8B', value: 'saina-helm-2-0.8b', description: 'Pin Helm 2; endpoints that do not serve it return an error' },
+            { name: 'Helm 0.8B (Original)', value: 'saina-helm-0.8b', description: 'Pin the original Helm' },
+          ] },
           { displayName: 'On Inference Error', name: 'errorMode', type: 'options', options: [{ name: 'Stop Workflow', value: 'stop' }, { name: 'Use Fallback Output', value: 'fallback' }], default: 'stop' },
           { displayName: 'Result Key', name: 'resultKey', type: 'string', default: 'answer', description: 'Name of the result inside saina.answers' },
           { displayName: 'Timeout (Seconds)', name: 'timeout', type: 'number', typeOptions: { minValue: 1, maxValue: 300 }, default: 60 },
@@ -62,6 +67,8 @@ export class SainaHelm implements INodeType {
         minMargin: this.getNodeParameter('minMargin', i, 0) as number,
         timeout: this.getNodeParameter('timeout', i) as number,
         errorMode: this.getNodeParameter('errorMode', i) as string,
+        // Version 1 workflows keep the model they were built with.
+        model: 'saina-helm-0.8b',
       } : this.getNodeParameter('advanced', i, {}) as AdvancedOptions;
       let settings, questions, state;
       try {
@@ -76,11 +83,11 @@ export class SainaHelm implements INodeType {
       } catch {
         throw new NodeOperationError(this.getNode(), 'Check Context, Question, Answers, and Advanced options. Answers must be unique and contain at least two labels. Yes / No requires Yes and No; Rating requires 2–10 ordered labels.', { itemIndex: i });
       }
-      const { mode, errorMode, threshold, minMargin, timeout } = settings;
+      const { mode, errorMode, threshold, minMargin, timeout, model } = settings;
       try {
         const policy = mode === 'decision' ? { threshold, min_margin: minMargin } : {};
         const response = await this.helpers.httpRequestWithAuthentication.call(this, 'sainaHelmApi', {
-          method: 'POST', url, body: { model: 'saina-helm-0.8b', state, mode, questions, ...policy },
+          method: 'POST', url, body: { model, state, mode, questions, ...policy },
           json: true, timeout: timeout * 1000, disableFollowRedirect: true,
         });
         const result = readResponse(response, questions, mode);

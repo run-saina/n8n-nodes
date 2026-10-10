@@ -42,7 +42,7 @@ test('minimal form sends labels without descriptions or JSON',async()=>{
   return {model:'saina-helm-0.8b',answers:{answer:{type:'single_choice',probabilities:{Billing:.9,'Technical support':.07,Other:.03},selection:'Billing',reason:'accepted'}},usage:{input_tokens:4,output_tokens:0}};
  };
  const out=await new SainaHelm().execute.call(ctx);
- assert.deepEqual(sent.body,{model:'saina-helm-0.8b',state:params.context,mode:'decision',questions:{answer:{type:'single_choice',question:'Which team?',options:{Billing:null,'Technical support':null,Other:null}}},threshold:.8,min_margin:0});
+ assert.deepEqual(sent.body,{model:'saina-helm',state:params.context,mode:'decision',questions:{answer:{type:'single_choice',question:'Which team?',options:{Billing:null,'Technical support':null,Other:null}}},threshold:.8,min_margin:0});
  assert.equal(sent.timeout,60000);assert.equal(out[0][0].json.saina.answers.answer.selection,'Billing');
 });
 test('answers support commas, newlines, and punctuation without changing labels',()=>{
@@ -57,7 +57,7 @@ test('advanced types and optional descriptions map to the native API contract',(
 });
 test('invalid questions and advanced settings fail before API calls',async()=>{
  for(const [q,a,advanced] of [['','A,B',{}],['Choose','A',{}],['Choose','A,a',{}],['Choose','A,,B',{}],['Choose','True,False',{answerType:'yes_no'}],['Choose','A,B',{descriptions:{entries:[{answer:'C',description:'Unmatched'}]}}],['Choose','A,B',{resultKey:'bad.key'}],['Choose',Array.from({length:11},(_,i)=>String(i)).join(','),{answerType:'rating'}]]) assert.throws(()=>buildQuestion(q,a,advanced));
- for (const options of [{threshold:NaN},{threshold:2},{minMargin:-1},{timeout:0},{mode:'unknown'}]) assert.throws(()=>readAdvanced(options));
+ for (const options of [{threshold:NaN},{threshold:2},{minMargin:-1},{timeout:0},{mode:'unknown'},{model:'gpt-4'}]) assert.throws(()=>readAdvanced(options));
  const ctx=context([response()]);ctx.getNode=()=>({name:'Saina Helm',type:'sainaHelm',typeVersion:2,position:[0,0],parameters:{}});
  const params={context:'',question:'Which?',answers:'A,B',advanced:{errorMode:'fallback'}};
  ctx.getNodeParameter=(name,_index,fallback)=>params[name]??fallback;
@@ -82,4 +82,18 @@ test('n8n renders only Context, Question, Answers, and Advanced for version 2',(
  assert.deepEqual(resolved,{context:'Ticket',question:'Which team?',answers:'Billing,Other',advanced:{}});
  const legacy=description.properties.filter(property=>NodeHelpers.displayParameter({mode:'decision'},property,{typeVersion:1},description));
  assert.ok(legacy.some(field=>field.name==='questions'));assert.ok(!legacy.some(field=>field.name==='context'));
+});
+test('model option pins a release; version 1 keeps the original model',async()=>{
+ const sentModels=[];
+ for (const [version, advanced, expected] of [[2,{model:'saina-helm-2-0.8b'},'saina-helm-2-0.8b'],[2,{model:'saina-helm-0.8b'},'saina-helm-0.8b'],[1,{},'saina-helm-0.8b']]) {
+  const ctx=context([response()]);ctx.getNode=()=>({name:'Saina Helm',type:'sainaHelm',typeVersion:version,position:[0,0],parameters:{}});
+  const params={context:'Ticket',question:'Which?',answers:'billing,technical,other',advanced,state:'Ticket',questions:JSON.stringify(questions),mode:'decision',threshold:.8,minMargin:0,errorMode:'stop',timeout:60};
+  ctx.getNodeParameter=(name,_index,fallback)=>params[name]??fallback;
+  ctx.helpers.httpRequestWithAuthentication=async(_name,options)=>{
+   sentModels.push(options.body.model);const r=response();
+   return {...r,answers:{[Object.keys(options.body.questions)[0]]:r.answers.team}};
+  };
+  await new SainaHelm().execute.call(ctx);
+  assert.equal(sentModels.at(-1),expected);
+ }
 });
