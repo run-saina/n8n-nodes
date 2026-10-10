@@ -13,7 +13,7 @@ Support teams and solo founders on n8n Cloud who want inbound messages sent to t
 3. **Selected branch** sends confident answers to **Billing**, **Technical support** or **Other**. Answers below the threshold, or too close to call, go to **Uncertain — review**.
 
 ## How to set up
-1. Get a Saina endpoint. **Hosted:** request a key at [saina.run/api](https://saina.run/api/) and use `https://api.saina.run` (keys are issued from a waitlist; request bodies are never stored). **Self-hosted:** run the free server with Docker ([run-saina/deploy](https://github.com/run-saina/deploy)) or `pip install 'saina[local,server]'`; it needs about 4 GB of RAM on CPU and downloads the open [Saina Helm 0.8B](https://huggingface.co/run-saina/saina-helm-0.8b) weights on first start.
+1. Get a Saina endpoint. **Hosted:** [create a free account](https://saina.run/signup/) (25 credits a day), create a key, and use `https://api.saina.run` (request bodies are never stored). **Self-hosted:** run the free server with Docker ([run-saina/deploy](https://github.com/run-saina/deploy)) or `pip install 'saina[local,server]'`; it needs about 4 GB of RAM on CPU and downloads the open [Saina Helm 0.8B](https://huggingface.co/run-saina/saina-helm-0.8b) weights on first start.
 2. If you self-host, the server must be reachable from n8n over HTTPS.
 3. Create a **Header Auth** credential with name `Authorization` and value `Bearer YOUR_KEY`, and select it in **Saina API**.
 4. If you self-host, set `saina_api_url` in **Example input** to your server. Then click **Test workflow**.

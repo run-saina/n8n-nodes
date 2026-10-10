@@ -14,7 +14,7 @@ Each incoming message is routed to billing, technical support or a catch-all que
 
 ## How to set up
 1. Install `@run-saina/n8n-nodes-saina` under **Settings → Community nodes**.
-2. Get a Saina endpoint. **Hosted:** request a key at [saina.run/api](https://saina.run/api/) and use `https://api.saina.run` (keys are issued from a waitlist; request bodies are never stored). **Self-hosted:** run the free server with Docker ([run-saina/deploy](https://github.com/run-saina/deploy)) or `pip install 'saina[local,server]'`; it needs about 4 GB of RAM on CPU and downloads the open [Saina Helm 0.8B](https://huggingface.co/run-saina/saina-helm-0.8b) weights on first start.
+2. Get a Saina endpoint. **Hosted:** [create a free account](https://saina.run/signup/) (25 credits a day), create a key, and use `https://api.saina.run` (request bodies are never stored). **Self-hosted:** run the free server with Docker ([run-saina/deploy](https://github.com/run-saina/deploy)) or `pip install 'saina[local,server]'`; it needs about 4 GB of RAM on CPU and downloads the open [Saina Helm 0.8B](https://huggingface.co/run-saina/saina-helm-0.8b) weights on first start.
 3. Create **Saina Helm API** credentials with the base URL (`https://api.saina.run` or your server) and API key, select them in the Saina Helm node, then click **Test workflow**.
 
 ## Requirements
