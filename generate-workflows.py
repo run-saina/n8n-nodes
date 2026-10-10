@@ -34,7 +34,7 @@ def write(slug, title, nodes, connections, description):
         'settings':{'executionOrder':'v1'},'pinData':{},'tags':[]},indent=2,ensure_ascii=False)+'\n')
     (docs/(slug+'.md')).write_text('# '+title+'\n\n'+description+'\n')
 
-SERVER='''Get a Saina endpoint. **Hosted:** request a key at [saina.run/api](https://saina.run/api/) and use `https://api.saina.run` (keys are issued from a waitlist; request bodies are never stored). **Self-hosted:** run the free server with Docker ([run-saina/deploy](https://github.com/run-saina/deploy)) or `pip install 'saina[local,server]'`; it needs about 4 GB of RAM on CPU and downloads the open [Saina Helm 0.8B](https://huggingface.co/run-saina/saina-helm-0.8b) weights on first start.'''
+SERVER='''Get a Saina endpoint. **Hosted:** [create a free account](https://saina.run/signup/) (25 credits a day), create a key, and use `https://api.saina.run` (request bodies are never stored). **Self-hosted:** run the free server with Docker ([run-saina/deploy](https://github.com/run-saina/deploy)) or `pip install 'saina[local,server]'`; it needs about 4 GB of RAM on CPU and downloads the open [Saina Helm 0.8B](https://huggingface.co/run-saina/saina-helm-0.8b) weights on first start.'''
 
 COMMUNITY='''> **Self-hosted n8n only.** This template uses the [Saina Helm community node](https://www.npmjs.com/package/@run-saina/n8n-nodes-saina), which is not yet verified, so it can't be installed on n8n Cloud. On n8n Cloud, use the "Route support tickets to teams with Saina Helm over HTTP" template instead.'''
 
