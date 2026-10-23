@@ -1,3 +1,5 @@
+# Stages releases through npm Trusted Publishing (OIDC, no stored token); the npm package trusts this repository and
+# this workflow file. Approve the staged version on npm, then run "verify".
 name: Publish
 on:
   workflow_dispatch:
@@ -33,8 +35,6 @@ jobs:
       - name: Stage release for npm approval
         if: inputs.operation == 'stage'
         run: npm stage publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Verify approved release
         if: inputs.operation == 'verify'
         run: npm run scan:published
