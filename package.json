@@ -34,6 +34,7 @@
     "@n8n/node-cli": "^0.51.3",
     "@n8n/scan-community-package": "0.38.0",
     "@types/node": "^22.0.0",
+    "axios": "1.18.0",
     "n8n-workflow": "2.16.0",
     "typescript": "5.9.3"
   },

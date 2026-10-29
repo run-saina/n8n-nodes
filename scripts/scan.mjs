@@ -4,12 +4,22 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { analyzePackage, analyzePackageByName } from '@n8n/scan-community-package/scanner/scanner.mjs';
 import { readFileSync } from 'node:fs';
+import axios from 'axios';
 
 function check(result) {
   if (!result.passed) throw new Error(result.details || result.message || 'Package scan failed');
 }
 
 if (process.argv.includes('--published')) {
+  // The upstream scanner leaves scoped names unescaped in the attestation URL.
+  // npm serves that route only when the scope separator is URL-encoded.
+  axios.interceptors.request.use((request) => {
+    request.url = request.url?.replace(
+      /^(https:\/\/registry\.npmjs\.org\/-\/npm\/v1\/attestations\/@[^/]+)\//,
+      '$1%2f',
+    );
+    return request;
+  });
   const { name, version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url)));
   check(await analyzePackageByName(name, version));
   console.log('Published package passed verification');

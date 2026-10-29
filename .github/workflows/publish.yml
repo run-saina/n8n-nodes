@@ -33,8 +33,7 @@ jobs:
           else
             echo "publish=true" >> "$GITHUB_OUTPUT"
           fi
-      - if: steps.version.outputs.publish == 'true'
-        run: npm ci --ignore-scripts
+      - run: npm ci --ignore-scripts
       - if: steps.version.outputs.publish == 'true'
         run: npm run lint
       - if: steps.version.outputs.publish == 'true'
@@ -45,7 +44,6 @@ jobs:
         if: steps.version.outputs.publish == 'true'
         run: npm publish --provenance --access public
       - name: Verify published package
-        if: steps.version.outputs.publish == 'true'
         timeout-minutes: 25
         run: |
           # npm scans uploads before making them available; this can take 15+ minutes.
