@@ -1,7 +1,7 @@
 {
   "name": "@run-saina/n8n-nodes-saina",
-  "version": "0.2.4",
-  "description": "Saina Helm decision node with confidence and fallback routing",
+  "version": "0.3.0",
+  "description": "Saina Decision and Saina Trace nodes: typed decisions from Saina models, connected providers or published Studio endpoints, with outcomes and traces",
   "license": "MIT",
   "keywords": [
     "n8n-community-node-package"
@@ -20,10 +20,12 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
+      "dist/credentials/SainaApi.credentials.js",
       "dist/credentials/SainaHelmApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/SainaHelm/SainaHelm.node.js"
+      "dist/nodes/SainaHelm/SainaHelm.node.js",
+      "dist/nodes/SainaTrace/SainaTrace.node.js"
     ],
     "strict": true
   },
