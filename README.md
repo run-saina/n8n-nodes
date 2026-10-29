@@ -2,12 +2,30 @@
 
 Saina is the decision layer for software systems. Saina builds specialist AI decision models and the developer platform around them. Developers use Saina to turn model predictions into versioned decision endpoints, observe how those decisions perform in production, turn failures into test cases, and improve their models or policies without breaking existing behavior. Saina works with open models and external inference providers, so teams can use their own infrastructure. Saina makes the decisions; n8n workflows execute them.
 
-Two nodes, one credential.
+Two nodes, a shared API-key or OAuth2 credential.
 
 - **Saina Decision** asks typed questions of a Saina model, a connected inference provider, or a published Studio endpoint. Items whose every answer is accepted leave on **Selected**; items with an abstained answer or an execution error leave on **Fallback**.
 - **Saina Trace** records what happened afterwards: report a business outcome for a decision, log a trace of a decision the workflow made elsewhere, or read a decision back.
 
 Create a **Saina API** credential with the API base URL and an account API key from Studio. Self-hosted services that do not authenticate can leave the key empty. The credential test calls `GET /v1/studio/discovery`.
+
+## OAuth2 sign-in
+
+In Saina Decision (version 3) or Saina Trace, choose **Authentication → OAuth2** and create a **Saina OAuth2 API** credential. The API-key option remains the default for existing workflows.
+
+Register your n8n installation once, using the exact **OAuth Redirect URL** shown in the credential dialog:
+
+```sh
+curl --fail-with-body https://api.saina.run/v1/mcp-oauth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"client_name":"Saina for n8n","redirect_uris":["https://YOUR-N8N-HOST/rest/oauth2-credential/callback"],"token_endpoint_auth_method":"client_secret_post","grant_types":["authorization_code","refresh_token"]}'
+```
+
+Paste the returned `client_id` and `client_secret` into the credential, then click **Connect my account**. Sign in as the Saina account owner and approve **write** access to run decisions, log traces, and report outcomes. Read access supports discovery and reading decisions only. Store the client secret in n8n credentials, never in workflows. For local n8n, HTTP callbacks are allowed on localhost; otherwise use HTTPS. For another OAuth-enabled Saina server, change both the registration origin and API Base URL.
+
+n8n handles PKCE (S256), encrypted credential storage, and refresh tokens through its [built-in OAuth2 credential](https://github.com/n8n-io/n8n/blob/master/packages/nodes-base/credentials/OAuth2Api.credentials.ts). Saina uses rotating refresh tokens; revoke the connection in Studio to disconnect it. Running a configured Decision workflow authorizes its inference calls, including provider billing.
+
+OAuth calls the Saina MCP endpoint (`/v1/mcp`), because these tokens cannot call REST routes. Trace writes require the server tools `log_traces` and `report_decision_outcome`. Self-hosted services without OAuth can continue to use the API-key credential with an empty key. Node versions 1 and 2 retain API-key authentication.
 
 ## Saina Decision
 
@@ -49,7 +67,7 @@ npm test
 npm pack
 # On the n8n host, install this tarball into the custom/community nodes directory:
 cd ~/.n8n/nodes
-npm install /absolute/path/run-saina-n8n-nodes-saina-0.3.0.tgz
+npm install /absolute/path/run-saina-n8n-nodes-saina-0.3.1.tgz
 # Restart n8n using your normal deployment/service command.
 ```
 

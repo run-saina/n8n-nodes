@@ -1,5 +1,14 @@
+import { NodeOperationError } from 'n8n-workflow';
 // Shared Studio contract helpers for the Saina Decision (v3) and Saina Trace nodes.
-import type { IAllExecuteFunctions, IExecuteFunctions, IDataObject, IHttpRequestOptions, INodePropertyOptions, NodeParameterValueType } from 'n8n-workflow';
+import type { IAllExecuteFunctions, IExecuteFunctions, IDataObject, IHttpRequestOptions, INodePropertyOptions, INodeProperties, NodeParameterValueType } from 'n8n-workflow';
+
+export const authenticationProperty: INodeProperties = {
+  displayName: 'Authentication', name: 'authentication', type: 'options', noDataExpression: true,
+  default: 'apiKey', options: [{ name: 'API Key', value: 'apiKey' }, { name: 'OAuth2', value: 'oAuth2' }],
+};
+export function credentialType(ctx: IAllExecuteFunctions): string {
+  return ctx.getNode().parameters.authentication === 'oAuth2' ? 'sainaOAuth2Api' : 'sainaApi';
+}
 
 export const CLIENT_HEADER = { 'X-Saina-Client': 'n8n' };
 export const QUESTION_TYPES: Record<string, string> = { noul: 'Yes / No', choice: 'Choose one', score: 'Rate on a scale' };
@@ -24,7 +33,31 @@ export function serviceOrigin(baseUrl: unknown): string {
 export async function studioRequest(ctx: IAllExecuteFunctions, origin: string, method: 'GET' | 'POST', path: string, body?: IDataObject, timeout = 60): Promise<unknown> {
   const options: IHttpRequestOptions = { method, url: origin + path, headers: CLIENT_HEADER, json: true, timeout: timeout * 1000, disableFollowRedirect: true };
   if (body) options.body = body;
-  return ctx.helpers.httpRequestWithAuthentication.call(ctx, 'sainaApi', options);
+  const credential = credentialType(ctx);
+  if (credential !== 'sainaOAuth2Api') return ctx.helpers.httpRequestWithAuthentication.call(ctx, credential, options);
+  // OAuth tokens are audience-bound to MCP; never send them to the REST routes.
+  const operation = mcpOperation(method, path, body);
+  const response = await ctx.helpers.httpRequestWithAuthentication.call(ctx, credential, {
+    ...options, method: 'POST', url: origin + '/v1/mcp',
+    headers: { ...CLIENT_HEADER, Accept: 'application/json, text/event-stream' },
+    body: { jsonrpc: '2.0', id: 1, method: 'tools/call', params: operation },
+  }) as { jsonrpc?: string; id?: number; error?: unknown; result?: { isError?: boolean; content?: Array<{ type?: string; text?: string }> } };
+  if (response?.jsonrpc !== '2.0' || response.id !== 1 || response.error || response.result?.isError) throw new Error('Saina OAuth request failed');
+  const content = response.result?.content?.find(item => item.type === 'text');
+  if (!content?.text) throw new Error('Invalid Saina MCP response');
+  try { return JSON.parse(content.text); } catch { throw new NodeOperationError(ctx.getNode(), 'Invalid Saina MCP response'); }
+}
+
+export function mcpOperation(method: 'GET' | 'POST', path: string, body: IDataObject = {}): { name: string; arguments: IDataObject } {
+  if (method === 'GET' && path === '/v1/studio/discovery') return { name: 'get_discovery', arguments: {} };
+  if (method === 'POST' && path === '/v1/studio/playground/test') return { name: 'test_model', arguments: { ...body, confirm_cost: true } };
+  if (method === 'POST' && path === '/v1/studio/business-outcomes') return { name: 'report_decision_outcome', arguments: body };
+  if (method === 'POST' && path === '/v1/traces') return { name: 'log_traces', arguments: body };
+  const endpoint = path.match(/^\/v1\/studio\/endpoints\/([^/]+)\/decide$/);
+  if (method === 'POST' && endpoint) return { name: 'run_decision_endpoint', arguments: { ...body, endpoint: decodeURIComponent(endpoint[1]), confirm_cost: true } };
+  const decision = path.match(/^\/v1\/studio\/decisions\/([^/]+)$/);
+  if (method === 'GET' && decision) return { name: 'get_decision', arguments: { decision_id: decodeURIComponent(decision[1]) } };
+  throw new Error('Unsupported Saina OAuth operation');
 }
 
 export async function discover(ctx: IAllExecuteFunctions, origin: string): Promise<Discovery> {

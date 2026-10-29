@@ -3,7 +3,7 @@ import type { IDataObject, IExecuteFunctions, ILoadOptionsFunctions, INodeExecut
 import { readResponse, parseQuestions } from './contract';
 import { buildQuestion, readAdvanced } from './form';
 import type { AdvancedOptions } from './form';
-import { accepted, attachments, buildQuestions, compactDecision, discover, endpointOptions, modelOptions, parseState, providerOptions, readDecision, serviceOrigin, studioRequest, versionOptions } from './studio';
+import { authenticationProperty, credentialType, accepted, attachments, buildQuestions, compactDecision, discover, endpointOptions, modelOptions, parseState, providerOptions, readDecision, serviceOrigin, studioRequest, versionOptions } from './studio';
 import type { QuestionRow } from './studio';
 
 const v3 = { show: { '@version': [3] } };
@@ -11,7 +11,7 @@ const modelMode = { show: { '@version': [3] }, hide: { provider: ['endpoint'] } 
 const endpointMode = { show: { '@version': [3], provider: ['endpoint'] } };
 
 async function loadDiscovery(ctx: ILoadOptionsFunctions) {
-  const credentials = await ctx.getCredentials('sainaApi');
+  const credentials = await ctx.getCredentials(credentialType(ctx));
   return discover(ctx, serviceOrigin(credentials.baseUrl));
 }
 
@@ -22,9 +22,11 @@ export class SainaHelm implements INodeType {
     inputs: [NodeConnectionTypes.Main], outputs: [NodeConnectionTypes.Main, NodeConnectionTypes.Main], outputNames: ['Selected', 'Fallback'],
     credentials: [
       { name: 'sainaHelmApi', required: true, displayOptions: { show: { '@version': [1, 2] } } },
-      { name: 'sainaApi', required: true, displayOptions: v3 },
+      { name: 'sainaApi', required: true, displayOptions: { show: { '@version': [3], authentication: ['apiKey'] } } },
+      { name: 'sainaOAuth2Api', required: true, displayOptions: { show: { '@version': [3], authentication: ['oAuth2'] } } },
     ],
     properties: [
+      { ...authenticationProperty, displayOptions: v3 },
       // Version 3 mirrors the Studio playground: provider and model, or Endpoint and version; input; attachments; questions.
       { displayName: 'Provider Name or ID', name: 'provider', type: 'options', default: 'saina', required: true, typeOptions: { loadOptionsMethod: 'getProviders' }, displayOptions: v3,
         description: 'Saina is always available. Connected inference providers and Endpoint appear when the account has them. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.' },
@@ -171,7 +173,7 @@ export class SainaHelm implements INodeType {
 // Endpoint mode posts to the published endpoint, which records the decision for outcomes.
 async function executeStudio(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
   const items = this.getInputData(), selected: INodeExecutionData[] = [], fallback: INodeExecutionData[] = [];
-  const credentials = await this.getCredentials('sainaApi');
+  const credentials = await this.getCredentials(credentialType(this));
   let origin: string;
   try { origin = serviceOrigin(credentials.baseUrl); } catch (error) { throw new NodeOperationError(this.getNode(), (error as Error).message); }
   for (let i = 0; i < items.length; i++) {

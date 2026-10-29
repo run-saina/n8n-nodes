@@ -1,6 +1,6 @@
 import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 import type { IDataObject, IExecuteFunctions, INodeExecutionData, INodeType, INodeTypeDescription } from 'n8n-workflow';
-import { identifier, parseJson, serviceOrigin, studioRequest } from '../SainaHelm/studio';
+import { authenticationProperty, credentialType, identifier, parseJson, serviceOrigin, studioRequest } from '../SainaHelm/studio';
 
 const show = (...operations: string[]) => ({ show: { operation: operations } });
 
@@ -10,8 +10,12 @@ export class SainaTrace implements INodeType {
     displayName: 'Saina Trace', name: 'sainaTrace', icon: { light: 'file:saina.svg', dark: 'file:saina.dark.svg' }, group: ['transform'], version: 1,
     subtitle: '={{ $parameter.operation }}', description: 'Report business outcomes, log traces of decisions made elsewhere, and read decisions back', defaults: { name: 'Saina Trace' },
     inputs: [NodeConnectionTypes.Main], outputs: [NodeConnectionTypes.Main],
-    credentials: [{ name: 'sainaApi', required: true }],
+    credentials: [
+      { name: 'sainaApi', required: true, displayOptions: { show: { authentication: ['apiKey'] } } },
+      { name: 'sainaOAuth2Api', required: true, displayOptions: { show: { authentication: ['oAuth2'] } } },
+    ],
     properties: [
+      authenticationProperty,
       { displayName: 'Operation', name: 'operation', type: 'options', noDataExpression: true, default: 'reportOutcome', options: [
         { name: 'Report Outcome', value: 'reportOutcome', action: 'Report a business outcome for a decision', description: 'Attach what happened to a decision made by a Saina Decision endpoint' },
         { name: 'Log Trace', value: 'logTrace', action: 'Log a trace', description: 'Record a decision this workflow made without Saina, with its inputs and outcome' },
@@ -34,7 +38,7 @@ export class SainaTrace implements INodeType {
 
   async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
     const items = this.getInputData(), out: INodeExecutionData[] = [];
-    const credentials = await this.getCredentials('sainaApi');
+    const credentials = await this.getCredentials(credentialType(this));
     let origin: string;
     try { origin = serviceOrigin(credentials.baseUrl); } catch (error) { throw new NodeOperationError(this.getNode(), (error as Error).message); }
     for (let i = 0; i < items.length; i++) {
@@ -75,7 +79,7 @@ export class SainaTrace implements INodeType {
       } catch {
         // Never copy HTTP request headers, credentials, or raw exception objects into execution output.
         if (this.continueOnFail()) out.push({ json: { ...items[i].json, saina: { status: 'error', error: { code: 'request_failed' } } }, binary: items[i].binary, pairedItem: { item: i } });
-        else throw new NodeOperationError(this.getNode(), 'Saina request failed. Check the base URL, API key scopes, and inputs.', { itemIndex: i });
+        else throw new NodeOperationError(this.getNode(), 'Saina request failed. Check the base URL, credential permissions, and inputs.', { itemIndex: i });
       }
     }
     return [out];
