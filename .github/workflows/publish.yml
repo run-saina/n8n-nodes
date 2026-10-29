@@ -46,9 +46,17 @@ jobs:
         run: npm publish --provenance --access public
       - name: Verify published package
         if: steps.version.outputs.publish == 'true'
+        timeout-minutes: 25
         run: |
-          for attempt in 1 2 3 4 5 6; do
-            npm run scan:published && exit 0
-            sleep 20
+          # npm scans uploads before making them available; this can take 15+ minutes.
+          package="$(node -p "require('./package.json').name")@$(node -p "require('./package.json').version")"
+          for attempt in $(seq 1 40); do
+            if npm view "$package" version >/dev/null 2>&1; then
+              npm run scan:published
+              exit 0
+            fi
+            echo "Waiting for npm to make $package available ($attempt/40)"
+            sleep 30
           done
+          echo "::error::npm accepted the upload, but $package is still unavailable after 20 minutes. Check npm processing before retrying publication."
           exit 1
