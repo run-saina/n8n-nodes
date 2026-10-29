@@ -1,5 +1,7 @@
 # Saina for n8n
 
+Saina is the decision layer for software systems. Saina builds specialist AI decision models and the developer platform around them. Developers use Saina to turn model predictions into versioned decision endpoints, observe how those decisions perform in production, turn failures into test cases, and improve their models or policies without breaking existing behavior. Saina works with open models and external inference providers, so teams can use their own infrastructure. Saina makes the decisions; n8n workflows execute them.
+
 Two nodes, one credential.
 
 - **Saina Decision** asks typed questions of a Saina model, a connected inference provider, or a published Studio endpoint. Items whose every answer is accepted leave on **Selected**; items with an abstained answer or an execution error leave on **Fallback**.
